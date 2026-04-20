@@ -1,0 +1,338 @@
+---
+import MyLayout from '../layouts/mylayout.astro';
+import ItemCard from '../components/ItemCard.astro';
+import projectImage1 from '../img/pfp8.png';
+import projectImage2 from '../img/pfp8.png';
+
+const SHOW_PROJECTS = false;
+
+const projectItems = [
+  {
+    img: projectImage1,
+    imgAlt: "Project screenshot",
+    title: "Web Application",
+    description: "A full-stack web application built with modern technologies.",
+    date: "2024-01-05",
+    href: "https://github.com/kal-dev14/project",
+    details: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
+    tech: ["React", "Node.js", "PostgreSQL", "Docker"],
+  },
+  {
+    img: projectImage2,
+    imgAlt: "Project screenshot",
+    title: "Mobile App",
+    description: "A mobile application for iOS and Android with cross-platform support.",
+    date: "2024-02-12",
+    href: "https://github.com/kal-dev14/mobile-app",
+    details: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
+    tech: ["React Native", "TypeScript", "Firebase"],
+  },
+];
+
+const shuffled = [...projectItems].sort(() => Math.random() - 0.5);
+---
+
+<MyLayout title="projects - hana" currentPage="projects">
+  {!SHOW_PROJECTS && <div class="coming-soon">coming soon</div>}
+  {SHOW_PROJECTS && <div class="page-content">
+
+    <div class="navigation-controls">
+      <div class="dropdown-container">
+        <div class="custom-dropdown" id="custom-dropdown">
+          <button class="dropdown-trigger" id="dropdown-trigger" aria-haspopup="listbox" aria-expanded="false">
+            <span class="dropdown-selected" id="dropdown-selected">{shuffled[0].title}</span>
+            <span class="dropdown-arrow">∨</span>
+          </button>
+          <ul class="dropdown-list" id="dropdown-list" role="listbox">
+            {shuffled.map((item, index) => (
+              <li class={`dropdown-option ${index === 0 ? 'active' : ''}`} role="option" data-value={index} aria-selected={index === 0}>
+                {item.title}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div class="arrow-controls">
+        <button id="prev-btn" class="nav-arrow">‹</button>
+        <span class="item-counter">
+          <span id="current-index">1</span> / <span id="total-items">{shuffled.length}</span>
+        </span>
+        <button id="next-btn" class="nav-arrow">›</button>
+      </div>
+    </div>
+
+    <div class="items-container">
+      {shuffled.map((item, index) => (
+        <div class="item-wrapper" data-index={index} style={index === 0 ? 'display: block;' : 'display: none;'}>
+          <ItemCard
+            img={item.img}
+            imgAlt={item.imgAlt}
+            title={item.title}
+            description={item.description}
+            date={item.date}
+            type="project"
+            href={item.href}
+          />
+          <div class="project-details">
+            <p class="project-details__text">{item.details}</p>
+            <div class="project-tech">
+              {item.tech.map((tag) => (
+                <span class="tech-tag">{tag}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>}
+</MyLayout>
+
+<script>
+  function init() {
+    const items = document.querySelectorAll('.item-wrapper');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const currentIndexSpan = document.getElementById('current-index');
+    const trigger = document.getElementById('dropdown-trigger');
+    const list = document.getElementById('dropdown-list');
+    const selectedLabel = document.getElementById('dropdown-selected');
+    const options = document.querySelectorAll('.dropdown-option');
+    let currentIndex = 0;
+    let isOpen = false;
+
+    function showItem(index: number) {
+      items.forEach((item, i) => {
+        (item as HTMLElement).style.display = i === index ? 'block' : 'none';
+      });
+      options.forEach((opt, i) => {
+        opt.classList.toggle('active', i === index);
+        opt.setAttribute('aria-selected', String(i === index));
+      });
+      if (selectedLabel) selectedLabel.textContent = options[index]?.textContent?.trim() ?? '';
+      if (currentIndexSpan) currentIndexSpan.textContent = (index + 1).toString();
+      currentIndex = index;
+    }
+
+    function toggleDropdown(open: boolean) {
+      isOpen = open;
+      list?.classList.toggle('open', open);
+      trigger?.setAttribute('aria-expanded', String(open));
+    }
+
+    trigger?.addEventListener('click', () => toggleDropdown(!isOpen));
+
+    options.forEach((opt, index) => {
+      opt.addEventListener('click', () => {
+        showItem(index);
+        toggleDropdown(false);
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!document.getElementById('custom-dropdown')?.contains(e.target as Node)) {
+        toggleDropdown(false);
+      }
+    });
+
+    prevBtn?.addEventListener('click', () => showItem((currentIndex - 1 + items.length) % items.length));
+    nextBtn?.addEventListener('click', () => showItem((currentIndex + 1) % items.length));
+
+    showItem(0);
+  }
+
+  document.addEventListener('astro:page-load', init);
+</script>
+
+<style>
+  .coming-soon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: 1em;
+    color: var(--text-primary);
+  }
+
+  .page-content {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .navigation-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0;
+    margin-bottom: 1em;
+    gap: 1em;
+    flex-wrap: wrap;
+  }
+
+  .dropdown-container {
+    flex: 1;
+    min-width: 12em;
+    position: relative;
+  }
+
+  .custom-dropdown {
+    position: relative;
+    width: 100%;
+    font-size: 1em;
+  }
+
+  .dropdown-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5em 0.75em;
+    background-color: var(--bg-white);
+    border: 1px solid var(--border-secondary);
+    border-radius: var(--border-radius);
+    font-family: 'Atkinson Hyperlegible Mono', monospace;
+    font-size: 1em;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: border-color 0.2s;
+    text-align: left;
+  }
+
+  .dropdown-trigger:hover,
+  .dropdown-trigger[aria-expanded="true"] {
+    border-color: var(--border-primary);
+  }
+
+  .dropdown-arrow {
+    font-size: 0.75em;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    margin-left: 0.5em;
+  }
+
+  .dropdown-trigger[aria-expanded="true"] .dropdown-arrow {
+    transform: rotate(180deg);
+  }
+
+  .dropdown-list {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background-color: var(--bg-white);
+    border: 1px solid var(--border-secondary);
+    border-radius: var(--border-radius);
+    list-style: none;
+    padding: 0.3em 0;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .dropdown-list.open {
+    display: block;
+  }
+
+  .dropdown-option {
+    padding: 0.5em 0.75em;
+    cursor: pointer;
+    font-size: 0.95em;
+    color: var(--text-primary);
+    transition: background-color 0.15s;
+  }
+
+  .dropdown-option:hover {
+    background-color: var(--bg-tertiary);
+  }
+
+  .dropdown-option.active {
+    background-color: var(--bg-tertiary);
+    font-weight: 600;
+  }
+
+  .arrow-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+  }
+
+  .nav-arrow {
+    width: 1.8em;
+    height: 1.8em;
+    border: 1px solid var(--border-secondary);
+    background-color: var(--bg-white);
+    border-radius: var(--border-radius);
+    font-size: 1em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .nav-arrow:hover {
+    background-color: var(--bg-hover);
+    border-color: var(--border-primary);
+  }
+
+  .item-counter {
+    font-size: 1em;
+    color: var(--text-secondary);
+    min-width: 3.5em;
+    text-align: center;
+  }
+
+  .items-container {
+    margin-top: 0;
+  }
+
+  .item-wrapper {
+    width: 100%;
+  }
+
+  .item-wrapper :global(.item-card--project) {
+    margin-bottom: 0;
+  }
+
+  .project-details {
+    padding: 1em 0 0.5em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+  }
+
+  .project-details__text {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  .project-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4em;
+  }
+
+  .tech-tag {
+    font-size: 0.78em;
+    padding: 0.15em 0.5em;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-tertiary);
+    border-radius: 4px;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 768px) {
+    .navigation-controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .arrow-controls {
+      justify-content: center;
+    }
+  }
+</style>

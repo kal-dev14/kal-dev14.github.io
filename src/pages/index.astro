@@ -1,0 +1,171 @@
+---
+import MyLayout from '../layouts/mylayout.astro';
+import profileImage from '../img/pfp8.png';
+---
+
+<MyLayout title="hana" currentPage="about">
+  <div class="profile-card">
+    <div class="profile-left">
+      <div class="profile-image-container">
+        <img 
+          src={profileImage.src} 
+          alt="Profile" 
+          class="profile-image"
+        />
+      </div>
+      <div class="username">٩(ˊᗜˋ*)و ♡</div>
+    </div>
+
+    <div class="profile-right">
+      <div class="info-section">
+        <span class="info-label">name:</span>
+        <span class="info-value"><strong>hana (she/her)</strong></span>
+      </div>
+
+      <div class="info-section">
+        <span class="info-label">school:</span>
+        <span class="info-value"><strong>cs @ uw madison</strong></span>
+      </div>
+
+      <div class="info-section">
+        <span class="info-value"><strong>incoming swe @ <a href="https://figma.com/design/" target="_blank" rel="noopener noreferrer" class="info-value-link">figma</a><br>previous swe @ <a href="https://www.afterquery.com/" target="_blank" rel="noopener noreferrer" class="info-value-link">afterquery</a>, <a href="https://ukg.com" target="_blank" rel="noopener noreferrer" class="info-value-link">ukg</a>, <a href="https://godaddy.com" target="_blank" rel="noopener noreferrer" class="info-value-link">godaddy</a></strong></span>
+      </div>
+
+      <div class="info-section">
+        <span class="info-value">hi hi hi! i love engineering and art and anything at the cross-section of them ⁽ˊᵕˋ⁾<br>i'm always open to new opportunities or connections -- please reach out by email!</span>
+      </div>
+
+
+      <div class="social-media">
+        <a href="https://www.linkedin.com/in/hana14h/" target="_blank" class="social">[linkedin]</a>
+        <a href="https://x.com/kalmoash" target="_blank" class="social">[twitter]</a>
+        <a href="https://github.com/kal-dev14" target="_blank" class="social">[github]</a>
+        <a href="hanahassan@willowmail.com" target="_blank" class="social">[email]</a>
+      </div>
+    </div>
+  </div>
+</MyLayout>
+
+<style>
+  .profile-card {
+    display: flex;
+    gap: 5%;
+    background-color: transparent;
+    padding: 2%;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .profile-left {
+    flex: 0 0 13em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-image-container {
+    width: 10em;
+    height: 10em;
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .username {
+    font-size: 1em;
+    margin-bottom: 0.5em;
+    color: var(--text-primary);
+  }
+
+  .credit {
+    font-size: 0.8em;
+    color: var(--text-secondary);
+  }
+
+  .profile-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+  }
+
+  .info-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    align-items: baseline;
+  }
+
+  .info-label {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-tertiary);
+    padding: 0.15em 0.5em;
+    font-size: 1em;
+    border-radius: 4px;
+  }
+
+  .info-value {
+    font-size: 1em;
+    color: var(--text-primary);
+    line-height: 1.5;
+  }
+
+  .info-value strong {
+    font-weight: 600;
+  }
+
+  .info-value a {
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-decoration-color: var(--link-underline);
+    text-underline-offset: 2px;
+    transition: text-decoration-color 0.2s;
+  }
+
+  .info-value a:hover {
+    text-decoration-color: var(--text-primary);
+  }
+
+  .social-media {
+    display: flex;
+    gap: 0.75em;
+    margin-top: 0.5em;
+    align-items: center;
+  }
+
+  .social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--text-tertiary);
+    font-size: 1em;
+    transition: color 0.2s;
+  }
+
+  .social:hover {
+    color: var(--text-black);
+  }
+  .info-value-link:hover {
+    color: var(--text-black)
+  }
+
+  @media (max-width: 768px) {
+    .profile-card {
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .profile-left {
+      flex: none;
+    }
+  }
+</style>

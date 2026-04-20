@@ -1,0 +1,353 @@
+---
+interface Props {
+  img: ImageMetadata | string;
+  imgAlt?: string;
+  title: string;
+  description: string;
+  date: string;
+  type?: 'art' | 'blog' | 'project';
+  href?: string;
+}
+
+const { 
+  img, 
+  imgAlt = '', 
+  title, 
+  description, 
+  date, 
+  type = 'project',
+  href 
+} = Astro.props;
+
+const imgSrc = typeof img === 'string' ? img : img.src;
+const Tag = href ? 'a' : 'div';
+const tagProps = href ? { href } : {};
+---
+
+<Tag 
+  {...tagProps}
+  class={`item-card item-card--${type}`}
+  class:has-link={!!href}
+>
+  {type === 'art' ? (
+    <>
+      <div class="item-card__image-container item-card__image-container--art">
+        <img 
+          src={imgSrc} 
+          alt={imgAlt || title}
+          class="item-card__image"
+        />
+      </div>
+      <div class="item-card__content item-card__content--art">
+        <div class="item-card__meta">
+          <span class="item-card__title item-card__title--art">{title}</span>
+          <span class="item-card__date item-card__date--art">{date}</span>
+        </div>
+        {description && <p class="item-card__description item-card__description--art">{description}</p>}
+      </div>
+    </>
+  ) : type === 'blog' ? (
+    <>
+      <div class="item-card__image-container item-card__image-container--blog">
+        <img 
+          src={imgSrc} 
+          alt={imgAlt || title}
+          class="item-card__image"
+        />
+      </div>
+      <div class="item-card__content item-card__content--blog">
+        <div class="item-card__header">
+          <h1 class="item-card__title item-card__title--blog">{title}</h1>
+          <span class="item-card__date">{date}</span>
+        </div>
+        <div class="item-card__body">
+          <p class="item-card__description item-card__description--blog">{description}</p>
+          <slot name="extra" />
+        </div>
+      </div>
+    </>
+  ) : (
+    <>
+      <div class="item-card__image-container">
+        <img 
+          src={imgSrc} 
+          alt={imgAlt || title}
+          class="item-card__image"
+        />
+      </div>
+      <div class="item-card__content">
+        <div class="item-card__header">
+          <h2 class="item-card__title">{title}</h2>
+          <span class="item-card__date">{date}</span>
+        </div>
+        <p class="item-card__description">{description}</p>
+        <slot name="extra" />
+      </div>
+    </>
+  )}
+</Tag>
+
+<style>
+  .item-card {
+    display: flex;
+    gap: 1.2em;
+    padding: 1.2em;
+    background-color: var(--bg-white);
+    border: 1px solid var(--border-secondary);
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+    margin-bottom: 1.2em;
+  }
+
+  .item-card.has-link {
+    cursor: pointer;
+  }
+
+  .item-card:hover {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22 viewBox=%220 0 32 32%22%3E%3Cpath d=%22M6 3 L6 26 L12 20 L16 28 L19 27 L15 19 L22 19 Z%22 fill=%22white%22 stroke=%22%23333%22 stroke-width=%222%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E") 6 3, pointer;
+  }
+
+  .item-card.has-link:hover {
+    background-color: var(--bg-hover);
+    border-color: var(--border-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Art Layout - Image Front and Center */
+  .item-card--art {
+    flex-direction: column;
+    border: none;
+  }
+
+  .item-card__image-container--art {
+
+
+  }
+
+  .item-card__image-container--art .item-card__image {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    max-height: none;
+    object-fit: contain;
+    background-color: transparent;
+  }
+
+  .item-card__content--art {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: left;
+    text-align: left;
+  }
+
+  .item-card__meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .item-card__title--art {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-primary);
+  }
+
+  .item-card__date--art {
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 0;
+    background-color: transparent;
+  }
+
+  .item-card__description--art {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* Blog Layout - Full Blog Post */
+  .item-card--blog {
+    flex-direction: column;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+  }
+
+  .item-card--blog.has-link:hover {
+    background-color: transparent;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .item-card__image-container--blog {
+    width: 100%;
+    height: 400px;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    border: 1px solid var(--border-secondary);
+    margin-bottom: 30px;
+  }
+
+  .item-card__image-container--blog .item-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .item-card__content--blog {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .item-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .item-card__title--blog {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    flex: 1;
+    line-height: 1.2;
+  }
+
+  .item-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .item-card__description--blog {
+    font-size: 18px;
+    color: var(--text-primary);
+    line-height: 1.8;
+    margin: 0;
+  }
+
+  /* Project Layout - Side by Side */
+  .item-card__image-container {
+    flex: 0 0 6em;
+    height: 6em;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    border: 1px solid var(--border-tertiary);
+  }
+
+  .item-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .item-card__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+  }
+
+  .item-card__title {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    min-width: 0;
+  }
+
+  .item-card__date {
+    font-size: 0.78em;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    padding: 0.15em 0.5em;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-tertiary);
+    border-radius: 4px;
+  }
+
+  .item-card__description {
+    font-size: 0.95em;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .item-card--project .item-card__date {
+    background-color: var(--bg-tertiary);
+  }
+
+  /* Extra content slot styling */
+  .item-card__content :global(.extra-content) {
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-tertiary);
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .item-card__body :global(.extra-content) {
+    margin-top: 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-tertiary);
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 768px) {
+    .item-card--art {
+      padding: 15px;
+    }
+
+    .item-card__image-container--art {
+      height: 500px;
+    }
+
+    .item-card__title--blog {
+      font-size: 24px;
+    }
+
+    .item-card__image-container--blog {
+      height: 250px;
+    }
+
+    .item-card__description--blog {
+      font-size: 16px;
+    }
+
+    .item-card--project {
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .item-card__image-container {
+      flex: none;
+      width: 100%;
+    }
+
+    .item-card__header {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .item-card__title {
+      min-width: auto;
+    }
+  }
+</style>
+

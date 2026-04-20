@@ -1,0 +1,362 @@
+---
+import { ViewTransitions } from 'astro:transitions';
+import { ChevronLeft, ChevronRight, Plus, RotateCw, Minus, Square, X } from '@lucide/astro';
+const { title, currentPage = 'about' } = Astro.props;
+const tabs = [
+  { name: 'about', href: '/' },
+  { name: 'art', href: '/art' },
+  { name: 'projects', href: '/projects' },
+  { name: 'blog', href: '/blog' },
+];
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+    <title>{title}</title>
+    <ViewTransitions />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <div class="browser-window">
+      <!-- Browser Window Controls -->
+      <div class="window-controls">
+        <button class="control-btn minimize"><Minus size={14} /></button>
+        <button class="control-btn maximize"><Square size={14} /></button>
+        <button class="control-btn close"><X size={14} /></button>
+      </div>
+
+      <!-- Browser Tabs -->
+      <div class="tabs" id="tabs-container">
+        {tabs.map((tab) => (
+          <a
+            href={tab.href}
+            class={`tab ${currentPage === tab.name ? 'active' : ''}`}
+            draggable="false"
+            data-tab-name={tab.name}
+            data-tab-href={tab.href}
+          >
+            {tab.name}
+          </a>
+        ))}
+      </div>
+
+      <!-- Navigation Bar -->
+      <div class="nav-bar">
+        <div class="nav-left">
+          <button class="nav-btn"><ChevronLeft size={14} /></button>
+          <button class="nav-btn"><ChevronRight size={14} /></button>
+          <button class="nav-btn"><Plus size={14} /></button>
+          <button class="nav-btn"><RotateCw size={14} /></button>
+        </div>
+        <div class="url-bar">
+          <span class="url">https://kal-dev14.github.io{tabs.find(t => t.name === currentPage)?.href || '/'}</span>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <main class="content">
+        <slot />
+      </main>
+    </div>
+
+    <script>
+      function initTabs() {
+        const STORAGE_KEY = 'tab-order';
+        const tabsContainer = document.getElementById('tabs-container');
+        if (!tabsContainer) return;
+
+        function saveTabOrder() {
+          const order = Array.from(tabsContainer.children).map((t: any) => t.dataset.tabName);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(order));
+        }
+
+        function loadTabOrder() {
+          try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return;
+            const order: string[] = JSON.parse(saved);
+            const tabs = Array.from(tabsContainer.children) as HTMLElement[];
+            tabs.sort((a, b) => {
+              const ai = order.indexOf(a.dataset.tabName!);
+              const bi = order.indexOf(b.dataset.tabName!);
+              if (ai === -1) return -1;
+              if (bi === -1) return 1;
+              return ai - bi;
+            });
+            tabs.forEach(t => tabsContainer.appendChild(t));
+          } catch {}
+        }
+
+        loadTabOrder();
+
+        let dragging: HTMLElement | null = null;
+        let dragMoved = false;
+        let dragStartX = 0;
+
+        tabsContainer.addEventListener('pointerdown', (e: PointerEvent) => {
+          const tab = (e.target as Element).closest('.tab') as HTMLElement | null;
+          if (!tab) return;
+          dragging = tab;
+          dragMoved = false;
+          dragStartX = e.clientX;
+          tab.setPointerCapture(e.pointerId);
+          tab.classList.add('dragging');
+        });
+
+        tabsContainer.addEventListener('pointermove', (e: PointerEvent) => {
+          if (!dragging) return;
+          if (!dragMoved && Math.abs(e.clientX - dragStartX) < 6) return;
+          dragMoved = true;
+          const tabs = Array.from(tabsContainer.children) as HTMLElement[];
+          const target = tabs.find(t => {
+            if (t === dragging) return false;
+            const r = t.getBoundingClientRect();
+            return e.clientX >= r.left && e.clientX <= r.right;
+          });
+          if (!target) return;
+          const draggedIdx = tabs.indexOf(dragging);
+          const targetIdx = tabs.indexOf(target);
+          tabsContainer.insertBefore(dragging, draggedIdx < targetIdx ? target.nextSibling : target);
+        });
+
+        tabsContainer.addEventListener('pointerup', (e: PointerEvent) => {
+          if (!dragging) return;
+          dragging.classList.remove('dragging');
+          if (dragMoved) {
+            saveTabOrder();
+            // block the subsequent click
+            const blockClick = (ev: Event) => { ev.preventDefault(); ev.stopPropagation(); };
+            dragging.addEventListener('click', blockClick, { capture: true, once: true });
+          }
+          dragging = null;
+        });
+      }
+
+      document.addEventListener('astro:page-load', initTabs);
+    </script>
+
+  </body>
+
+  <style is:global>
+    :root {
+      /* Background Colors */
+      --bg-primary:rgb(210, 221, 196);
+      --bg-secondary: #fafafa;
+      --bg-tertiary: #e8e8e3;
+      --bg-quaternary: #d8d8d3;
+      --bg-window-controls: #e0e0d8;
+      --bg-white: #ffffff;
+      --bg-hover: #f0f0f0;
+      
+      /* Text Colors */
+      --text-primary: #333333;
+      --text-secondary: #666666;
+      --text-tertiary: #444444;
+      --text-black: #000000;
+      
+      /* Border Colors */
+      --border-primary:rgb(148, 166, 149);
+      --border-secondary: #cccccc;
+      --border-tertiary: #dddddd;
+      --border-quaternary: #e0e0e0;
+      --border-quinary: #d0d0d0;
+        
+      /* Accent Colors */
+      --accent-pink: #ff6b9d;
+      
+      /* Link Colors */
+      --link-underline: #999999;
+      
+      /* Border Radius */
+      --border-radius: 10px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Atkinson Hyperlegible Mono', monospace;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .browser-window {
+      background-color: var(--bg-secondary);
+      border-radius: 10px;
+      box-shadow: 0 0 0 2px var(--border-primary);
+      max-width: 1000px;
+      width: 100%;
+      height: 680px;
+      display: flex;
+      flex-direction: column;
+      font-size: clamp(15px, 1.6vw, 20px);
+      overflow: hidden;
+      cursor: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22 viewBox=%220 0 32 32%22%3E%3Cpath d=%22M6 3 L6 26 L12 20 L16 28 L19 27 L15 19 L22 19 Z%22 fill=%22white%22 stroke=%22%23333%22 stroke-width=%222%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E") 6 3, default;
+    }
+
+    html,
+    html *,
+    html *:hover,
+    html *:active,
+    html *:focus,
+    .browser-window,
+    .browser-window *,
+    .browser-window *:hover,
+    .browser-window *:active,
+    .browser-window *:focus {
+      cursor: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22 viewBox=%220 0 32 32%22%3E%3Cpath d=%22M6 3 L6 26 L12 20 L16 28 L19 27 L15 19 L22 19 Z%22 fill=%22white%22 stroke=%22%23333%22 stroke-width=%222%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E") 6 3, default !important;
+    }
+
+    /* Window Controls */
+    .window-controls {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.6em;
+      padding: 0.8em 0.8em 0 0.6em;
+      background-color: var(--bg-window-controls);
+      border-radius: 10px 10px 0 0;
+    }
+
+    .control-btn {
+      width: 1.8em;
+      height: 1.8em;
+      border: 1px solid var(--border-secondary);
+      background-color: var(--bg-white);
+      cursor: pointer;
+      font-size: 0.9em;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--border-radius);
+    }
+
+    .control-btn:hover {
+      background-color: var(--bg-hover);
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      padding: 10px 16px 0 16px;
+      background-color: var(--bg-window-controls);
+      position: relative;
+      z-index: 1;
+      user-select: none;
+    }
+
+    .tab {
+      padding: 0.6em 1.5em;
+      background-color: var(--bg-quaternary);
+      border: 1px solid var(--border-secondary);
+      border-bottom: none;
+      cursor: pointer;
+      font-size: 0.85em;
+      text-decoration: none;
+      color: inherit;
+      display: inline-block;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+      position: relative;
+    }
+
+    .tab.active {
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--bg-secondary);
+      z-index: 2;
+    }
+
+    .tab.dragging {
+      opacity: 0.5;
+      cursor: grabbing;
+    }
+
+    .tabs.dragging-over {
+      cursor: grabbing;
+    }
+
+    /* Navigation Bar */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-quaternary);
+      gap: 12px;
+      background-color: var(--bg-secondary);
+      position: relative;
+      z-index: 0;
+    }
+
+    .nav-left {
+      display: flex;
+      gap: 6px;
+    }
+
+    .nav-btn {
+      width: 1.8em;
+      height: 1.8em;
+      border: 1px solid var(--border-secondary);
+      background-color: var(--bg-white);
+      cursor: pointer;
+      font-size: 0.9em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--border-radius);
+    }
+
+    .url-bar {
+      flex: 1;
+      padding: 0.25em 0.75em;
+      background-color: var(--bg-white);
+      border: 1px solid var(--border-secondary);
+      font-size: 0.8em;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: var(--border-radius);
+    }
+
+    .heart {
+      color: var(--accent-pink);
+    }
+
+    .nav-right {
+      display: flex;
+      gap: 4px;
+    }
+
+    /* Main Content */
+    .content {
+      padding: 3% 4%;
+      background-color: transparent;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+  </style>
+</html>

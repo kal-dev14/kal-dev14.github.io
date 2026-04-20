@@ -1,0 +1,221 @@
+---
+import MyLayout from '../layouts/mylayout.astro';
+import img20 from '../img/art/20.png';
+import img21 from '../img/art/21.png';
+import imgSketch from '../img/art/image_123986672.jpg';
+import img13 from '../img/art/13_sketchbook.jpg';
+import imgPhoto1 from '../img/art/photo1.jpg';
+import img22 from '../img/art/22.png';
+import img23 from '../img/art/23.png';
+import img26 from '../img/art/26.png';
+import imgPhoto2 from '../img/art/photo2.jpg';
+import imgHelen from '../img/art/9.png';
+import imgGiverny from '../img/art/giverny.jpg';
+import imgSword from '../img/art/sword.jpg';
+import imgBird from '../img/art/bird.jpg';
+import img0003 from '../img/art/img0003.jpg';
+
+const shuffled = [
+  { img: img13,      title: "patio" },
+  { img: imgHelen,   title: "helen" },
+  { img: imgSketch,  title: "madoka" },
+  { img: imgGiverny, title: "giverny" },
+  { img: imgPhoto1,  title: "fairy" },
+  { img: img20,      title: "living room" },
+  { img: imgSword,   title: "sword" },
+  { img: img0003,    title: "dawn" },
+  { img: imgPhoto2,  title: "rural street" },
+  { img: img21,      title: "character lineup" },
+  { img: img23,      title: "august" },
+  { img: img22,      title: "samantha" },
+  { img: img26,      title: "encounter" },
+].map(item => ({ ...item, imgAlt: item.title, date: "" }));
+---
+
+<MyLayout title="art - hana" currentPage="art">
+  <div class="lightbox" id="lightbox">
+    <img class="lightbox-img" id="lightbox-img" src="" alt="" />
+  </div>
+
+  <div class="art-page">
+    <div class="art-viewer">
+      {shuffled.map((item, index) => (
+        <div class="art-slide" data-index={index} data-title={item.title} style={index === 0 ? 'display: flex;' : 'display: none;'}>
+          <img src={typeof item.img === 'string' ? item.img : item.img.src} alt={item.imgAlt} class="art-image" />
+        </div>
+      ))}
+    </div>
+
+    <div class="art-bottom">
+      <span class="art-title" id="art-title">{shuffled[0].title}</span>
+      <div class="art-controls">
+        <button id="prev-btn" class="nav-arrow">‹</button>
+        <span class="item-counter">
+          <span id="current-index">1</span> / {shuffled.length}
+        </span>
+        <button id="next-btn" class="nav-arrow">›</button>
+      </div>
+    </div>
+  </div>
+</MyLayout>
+
+<script>
+  function initArt() {
+    const slides = document.querySelectorAll('.art-slide');
+    const titleEl = document.getElementById('art-title');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const currentIndexSpan = document.getElementById('current-index');
+    const titles = Array.from(slides).map(s => s.getAttribute('data-title'));
+    let currentIndex = 0;
+
+    function showItem(index: number) {
+      slides.forEach((slide, i) => {
+        (slide as HTMLElement).style.display = i === index ? 'flex' : 'none';
+      });
+      if (currentIndexSpan) currentIndexSpan.textContent = (index + 1).toString();
+      if (titleEl) titleEl.textContent = (slides[index] as HTMLElement).dataset.title ?? '';
+      currentIndex = index;
+    }
+
+    prevBtn?.addEventListener('click', () => showItem((currentIndex - 1 + slides.length) % slides.length));
+    nextBtn?.addEventListener('click', () => showItem((currentIndex + 1) % slides.length));
+    showItem(0);
+
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img') as HTMLImageElement;
+
+    document.querySelectorAll('.art-image').forEach(img => {
+      img.addEventListener('click', () => {
+        if (lightboxImg) lightboxImg.src = (img as HTMLImageElement).src;
+        lightbox?.classList.add('open');
+      });
+    });
+
+    lightbox?.addEventListener('click', () => lightbox.classList.remove('open'));
+  }
+
+  document.addEventListener('astro:page-load', initArt);
+</script>
+
+<style>
+  .lightbox {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.15);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .lightbox.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .lightbox-img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+    transform: scale(0.92);
+    transition: transform 0.25s ease;
+  }
+
+  .lightbox.open .lightbox-img {
+    transform: scale(1);
+  }
+
+  .art-image {
+    cursor: zoom-in;
+  }
+
+  .art-page {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+    padding: 0 1.5em 1em;
+  }
+
+  .art-viewer {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .art-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+  }
+
+  .art-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  }
+
+  .art-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0 0.25em;
+  }
+
+  .art-title {
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .art-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+  }
+
+  .nav-arrow {
+    width: 1.8em;
+    height: 1.8em;
+    border: 1px solid var(--border-secondary);
+    background-color: var(--bg-white);
+    border-radius: var(--border-radius);
+    font-size: 1em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .nav-arrow:hover {
+    background-color: var(--bg-hover);
+    border-color: var(--border-primary);
+  }
+
+  .item-counter {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    min-width: 3em;
+    text-align: center;
+  }
+</style>

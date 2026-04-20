@@ -1,0 +1,5 @@
+- fix the navbar/tab height
+- standarize box rounding
+- fix corners not fitting
+- fix the tabs switching
+- mobile view
