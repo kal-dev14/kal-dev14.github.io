@@ -62,6 +62,7 @@ const shuffled = [
 <script>
   function initArt() {
     const slides = document.querySelectorAll('.art-slide');
+    if (!slides.length) return;
     const titleEl = document.getElementById('art-title');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');

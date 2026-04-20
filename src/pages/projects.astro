@@ -91,6 +91,7 @@ const shuffled = [...projectItems].sort(() => Math.random() - 0.5);
 <script>
   function init() {
     const items = document.querySelectorAll('.item-wrapper');
+    if (!document.getElementById('dropdown-trigger')) return;
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     const currentIndexSpan = document.getElementById('current-index');
