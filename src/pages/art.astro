@@ -1,5 +1,6 @@
 ---
 import MyLayout from '../layouts/mylayout.astro';
+import { Image } from 'astro:assets';
 import img20 from '../img/art/20.png';
 import img21 from '../img/art/21.png';
 import imgSketch from '../img/art/image_123986672.jpg';
@@ -41,7 +42,7 @@ const shuffled = [
     <div class="art-viewer">
       {shuffled.map((item, index) => (
         <div class="art-slide" data-index={index} data-title={item.title} style={index === 0 ? 'display: flex;' : 'display: none;'}>
-          <img src={typeof item.img === 'string' ? item.img : item.img.src} alt={item.imgAlt} class="art-image" />
+          <Image src={item.img} alt={item.imgAlt} class="art-image" loading={index === 0 ? 'eager' : 'lazy'} />
         </div>
       ))}
     </div>
