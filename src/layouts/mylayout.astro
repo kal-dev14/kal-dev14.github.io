@@ -19,6 +19,11 @@ const tabs = [
     <title>{title}</title>
     <ViewTransitions />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      ::view-transition-old(root), ::view-transition-new(root) {
+        animation-duration: 0.1s;
+      }
+    </style>
   </head>
   <body>
     <div class="browser-window">
